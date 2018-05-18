@@ -1,8 +1,5 @@
 #include "../tl.h"
-//------VARIABLES
-roadState state;
-batteryState battery=FULL_BATTERY;
-int batteryLevel = 100;
+
 
 
 
@@ -44,14 +41,15 @@ PROCESS_THREAD(traffic_light, ev, data){
 	int temp,hum;
 	printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
 	static struct etimer senseTimer;
-	initialize(&senseTimer);
+	initialize();
+	etimer_set(&senseTimer,CLOCK_SECOND*FULL_SENSE);
 	PROCESS_BEGIN();
 	while(true){
 		PROCESS_WAIT_EVENT();
 	  	if (etimer_expired(&senseTimer)){
 	  		temp = getTemperature();
 	  		hum = getHumidity();
-	  		printf("Sensed  temp: %d hum: %d \n",temp,hum );
+	  		printf("Sensed  temp: %d hum: %d \n",temp,hum);
 	  		etimer_reset(&senseTimer);///to remove;
 	  	}
 	}
