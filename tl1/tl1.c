@@ -30,11 +30,11 @@ static struct runicast_conn runicast;
 //------PROCESS
 PROCESS_THREAD(traffic_light, ev, data){
   static struct etimer timer;
-  linkaddr_set_node_addr(&tl1Address);
   
-  etimer_set(&timer,CLOCK_SECOND*cycles);
+  //etimer_set(&timer,CLOCK_SECOND*cycles);
 
   PROCESS_BEGIN();
+  printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
 
 
   PROCESS_END();
