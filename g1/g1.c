@@ -1,5 +1,5 @@
 #include "../header.h"
-#include "../tl.h"
+#include "stdio.h"
 
 PROCESS(traffic_light, "Traffic Light");
 

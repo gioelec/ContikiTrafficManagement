@@ -1,4 +1,11 @@
 #include "../tl.h"
+//------VARIABLES
+roadState state;
+batteryState battery=FULL_BATTERY;
+int batteryLevel = 100;
+
+
+
 
 PROCESS(traffic_light, "Traffic Light");
 
@@ -26,16 +33,29 @@ static struct broadcast_conn broadcast;
 static const struct runicast_callbacks runicast_calls = {recv_runicast, sent_runicast, timedout_runicast};
 static struct runicast_conn runicast;
 
+//------FUNCTIONS
+
+
+
+
 
 //------PROCESS
 PROCESS_THREAD(traffic_light, ev, data){
-  static struct etimer timer;
-  
-  //etimer_set(&timer,CLOCK_SECOND*cycles);
+	int temp,hum;
+	printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
+	static struct etimer senseTimer;
+	initialize(&senseTimer);
+	PROCESS_BEGIN();
+	while(true){
+		PROCESS_WAIT_EVENT();
+	  	if (etimer_expired(&senseTimer)){
+	  		temp = getTemperature();
+	  		hum = getHumidity();
+	  		printf("Sensed  temp: %d hum: %d \n",temp,hum );
+	  		etimer_reset(&senseTimer);///to remove;
+	  	}
+	}
 
-  PROCESS_BEGIN();
-  printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
 
-
-  PROCESS_END();
+	PROCESS_END();
 }
