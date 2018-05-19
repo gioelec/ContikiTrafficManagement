@@ -38,19 +38,22 @@ static struct runicast_conn runicast;
 
 //------PROCESS
 PROCESS_THREAD(traffic_light, ev, data){
+	
+	PROCESS_BEGIN();
 	int temp,hum;
 	printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
-	static struct etimer senseTimer;
 	initialize();
-	etimer_set(&senseTimer,CLOCK_SECOND*FULL_SENSE);
-	PROCESS_BEGIN();
+	printf("process beginned\n");
+	etimer_set(&senseTimer,sensingPeriod*CLOCK_SECOND);
 	while(true){
 		PROCESS_WAIT_EVENT();
 	  	if (etimer_expired(&senseTimer)){
 	  		temp = getTemperature();
 	  		hum = getHumidity();
+	  		consumeBattery(SENSE_COST);
+	  		printf("New battery level %d\n", batteryLevel );
+	  		etimer_set(&senseTimer,sensingPeriod*CLOCK_SECOND);
 	  		printf("Sensed  temp: %d hum: %d \n",temp,hum);
-	  		etimer_reset(&senseTimer);///to remove;
 	  	}
 	}
 
