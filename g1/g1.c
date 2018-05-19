@@ -99,6 +99,7 @@ PROCESS_THREAD(keyboard_process,ev,data){
 		}else{
 			printf("Type in the Emergency Warning\n");
 			PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
+			emergencyMsg = (char *)malloc((strlen(data)+1)*sizeof(char));
 			strcpy(emergencyMsg,(char*)data);
 			printf("you have inserted the following message%s\n", emergencyMsg);
 		}
