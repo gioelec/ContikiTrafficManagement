@@ -1,17 +1,20 @@
 #include "../header.h"
+#include "dev/serial-line.h"
 
 #define QUEUESIZE 4
 
 PROCESS(g1, "G1111111");
+PROCESS(keyboard_process,"keyboard_process");
 
-AUTOSTART_PROCESSES(&g1);
+AUTOSTART_PROCESSES(&g1,&keyboard_process);
 //------VARIABLES
 int 	humStore[QUEUESIZE];
 int 	tempStore[QUEUESIZE];
 bool 	received[QUEUESIZE];
 int 	remaining = 3;
 int 	myAddr = 3-1;
-char 	emergencyMsg[] = {"EMERGENCY MESSAGE "};
+char* 	emergencyMsg;//= {"EMERGENCY MESSAGE "};
+char 	psw[] = {"NES"};
 //------FUNCTIONS
 void computeAverage(){
 	int t=0,h =0,i=0;
@@ -70,10 +73,9 @@ static const struct runicast_callbacks runicast_calls = {recv_runicast, sent_run
 static struct runicast_conn runicast;
 
 
-//------PROCESS
+//------PROCESS G1
 
-PROCESS_THREAD(g1, ev, data)
-{
+PROCESS_THREAD(g1, ev, data){
   PROCESS_EXITHANDLER(runicast_close(&runicast));
 
   PROCESS_BEGIN();
@@ -84,4 +86,24 @@ PROCESS_THREAD(g1, ev, data)
   PROCESS_WAIT_EVENT_UNTIL(0);
 
   PROCESS_END();
+}
+//------PROCESS keyboard_process
+PROCESS_THREAD(keyboard_process,ev,data){
+  	PROCESS_BEGIN();
+  	while(1){
+		printf("Please, type the password\n");
+		PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
+		if(strcmp((char *)data, psw) != 0){
+			printf("Incorrect password.\n");
+			continue;
+		}else{
+			printf("Type in the Emergency Warning\n");
+			PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
+			strcpy(emergencyMsg,(char*)data);
+			printf("you have inserted the following message%s\n", emergencyMsg);
+		}
+	}
+  	PROCESS_END();
+
+
 }
