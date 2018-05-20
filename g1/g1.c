@@ -1,5 +1,7 @@
 #include "../header.h"
 #include "dev/serial-line.h"
+#include <stdlib.h>
+
 
 #define QUEUESIZE 4
 
@@ -13,7 +15,7 @@ int 	tempStore[QUEUESIZE];
 bool 	received[QUEUESIZE];
 int 	remaining = 3;
 int 	myAddr = 3-1;
-char* 	emergencyMsg;//= {"EMERGENCY MESSAGE "};
+char* 	emergencyMsg = NULL;//= {"EMERGENCY MESSAGE "};
 char 	psw[] = {"NES"};
 //------FUNCTIONS
 void computeAverage(){
@@ -26,7 +28,12 @@ void computeAverage(){
 	remaining = 3;
 	t = t/4;
 	h = h/4;
-	printf("%s temp: %d hum: %d\n",emergencyMsg,t,h);
+	if(emergencyMsg){
+		printf("%s temp: %d hum: %d\n",emergencyMsg,t,h);
+		free(emergencyMsg);
+	}else
+		printf("temp: %d hum: %d\n",t,h);
+
 }
 void addToBuffer(struct sampleData * data, int sender){
 	tempStore[sender] = data->temp;
@@ -42,13 +49,20 @@ void addToBuffer(struct sampleData * data, int sender){
 		}
 	}
 }
+void addMsg(char* data,int len){
+	if(len<=1)					//VOID INPUT ? SHOULD BE HANDLED IN THIS WAY???
+		return;
+	emergencyMsg = (char *)malloc(len*sizeof(char));
+	strcpy(emergencyMsg,data);
+}
 //------RUNICAST CALLBACK
 static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
-	int sender = (int)from->u8[0];
+	int s = (int)from->u8[0];
+	int sender = (s==tl1Address.u8[0])?tl1Index:(s==tl2Address.u8[0])?tl2Index:g2Index;
 	printf("runicast message received from %d.%d, seqno %d\n", from->u8[0], from->u8[1], seqno);
 	struct sampleData* data = (struct sampleData*)packetbuf_dataptr();
 	printf("RECEIVED: Temperature: %d, Humidity: %d\n",data->temp,data->hum);
-	addToBuffer(data,sender-1);
+	addToBuffer(data,sender);
 	///if samples 4
 	//process_post(&g1, PROCESS_EVENT_MSG, NULL);
 }
@@ -76,6 +90,7 @@ static struct runicast_conn runicast;
 //------PROCESS G1
 
 PROCESS_THREAD(g1, ev, data){
+
   PROCESS_EXITHANDLER(runicast_close(&runicast));
 
   PROCESS_BEGIN();
@@ -89,7 +104,7 @@ PROCESS_THREAD(g1, ev, data){
 }
 //------PROCESS keyboard_process
 PROCESS_THREAD(keyboard_process,ev,data){
-  	PROCESS_BEGIN();
+	PROCESS_BEGIN();
   	while(1){
 		printf("Please, type the password\n");
 		PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
@@ -99,8 +114,9 @@ PROCESS_THREAD(keyboard_process,ev,data){
 		}else{
 			printf("Type in the Emergency Warning\n");
 			PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
-			emergencyMsg = (char *)malloc((strlen(data)+1)*sizeof(char));
-			strcpy(emergencyMsg,(char*)data);
+			addMsg(data,(strlen(data)+1));
+			//emergencyMsg = (char *)malloc((strlen(data)+1)*sizeof(char));
+			//strcpy(emergencyMsg,(char*)data);
 			printf("you have inserted the following message%s\n", emergencyMsg);
 		}
 	}

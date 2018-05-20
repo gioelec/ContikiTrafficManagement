@@ -17,8 +17,9 @@ struct sampleData {
 	int temp;
 	int hum;
 };
-
-
+const int tl1Index = 0;
+const int tl2Index = 1;
+const int g2Index  = 3;
 const linkaddr_t tl1Address = {{1,0}};
 const linkaddr_t tl2Address = {{2,0}};
 const linkaddr_t g1Address  = {{3,0}};
