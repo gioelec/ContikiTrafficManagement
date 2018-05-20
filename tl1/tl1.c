@@ -19,19 +19,24 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 		if(isNormal){
 			printf("My road ordinary vehicle\n");
 			road = NORMAL;
+		}else{
+			printf("My road emergency vehicle\n");
+			road = EMERGENCY;
 		}
-		printf("My road emergency vehicle\n");
-		road = EMERGENCY;
-	}
-	if (linkaddr_cmp(from,&g2Address)){
+	}else if(linkaddr_cmp(from,&g2Address)){
 		if(isNormal){
 			printf("Other road ordinary vehicle\n");
 			otherRoad = NORMAL;
+		}else{
+			printf("Other road emergency vehicle\n");
+			otherRoad = EMERGENCY;
 		}
-		printf("Other road emergency vehicle\n");
-		otherRoad = EMERGENCY;
 	}
-	scheduleTraffic();
+	printf("calling scheduleTraffic from receive\n");
+	if(!scheduleTimerRunning && scheduleTraffic()){  //first time the time scheduler might not be running
+		gone = true;
+		printf("GREEN vehicle can proceed\n");
+	}
 }
 
 //------BROADCAST STRUCT
@@ -42,6 +47,7 @@ static const struct broadcast_callbacks broadcast_call = {broadcast_recv, broadc
 
 //------PROCESS
 PROCESS_THREAD(traffic_light, ev, data){
+	mainRoad = true;
 	PROCESS_EXITHANDLER(closeAll());
 	PROCESS_BEGIN();
 	broadcast_open(&broadcast, 129, &broadcast_call);
@@ -55,7 +61,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 		PROCESS_WAIT_EVENT();
 		if (etimer_expired(&blueTimer) && battery == LOW){    ///DO I HAVE TO REDUCE BATT HERE???
 			toggleBlue();
-	  	}
+	  	}/*
 	  	if (etimer_expired(&senseTimer)){
 	  		sample.temp = getTemperature();
 	  		sample.hum = getHumidity();
@@ -68,16 +74,24 @@ PROCESS_THREAD(traffic_light, ev, data){
 	  			blueStarted = true;
 	  		}
 	  		sendData(sample);
-	  	}
+	  	}*/
 	  	if (ev == sensors_event && data == &button_sensor){
 	  		rechargeBattery();
 	  	}
-	  	if(etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
+	  	if(!scheduleTimerRunning&& etimer_expired(&toggleTimer))//&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
 	  		toggleLights();
+	  	if(etimer_expired(&scheduleTimer)){//&& )){
+			printf("expired scheduleTimer\n");
+	  		if(scheduleTimerRunning){
+		  		if(gone)
+		  			sendNext(&g1Address);
+		  		scheduleTimerRunning=false;
+		  		printf("calling schedule traffic from expiration\n");
+		  		scheduleTraffic();
+	  		}
+	  	}
+	  	
 	}
 	SENSORS_DEACTIVATE(button_sensor);
-
-
-
 	PROCESS_END();
 }
