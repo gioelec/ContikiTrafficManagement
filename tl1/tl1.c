@@ -11,13 +11,40 @@ AUTOSTART_PROCESSES(&traffic_light);
 
 //------FUNCTIONS
 
+//------BROADCAST CALLBACK 
+static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
+	bool isNormal = (((char *)packetbuf_dataptr())[0]=='n');
+	printf("broadcast message received from %d.%d: '%s'\n", from->u8[0], from->u8[1], (char *)packetbuf_dataptr());
+	if(linkaddr_cmp(from,&g1Address)){
+		if(isNormal){
+			printf("My road ordinary vehicle\n");
+			road = NORMAL;
+		}
+		printf("My road emergency vehicle\n");
+		road = EMERGENCY;
+	}
+	if (linkaddr_cmp(from,&g2Address)){
+		if(isNormal){
+			printf("Other road ordinary vehicle\n");
+			otherRoad = NORMAL;
+		}
+		printf("Other road emergency vehicle\n");
+		otherRoad = EMERGENCY;
+	}
+	scheduleTraffic();
+}
+
+//------BROADCAST STRUCT
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv, broadcast_sent}; //Be careful to the order
+
 
 
 
 //------PROCESS
 PROCESS_THREAD(traffic_light, ev, data){
-	PROCESS_EXITHANDLER(runicast_close(&runicast));
+	PROCESS_EXITHANDLER(closeAll());
 	PROCESS_BEGIN();
+	broadcast_open(&broadcast, 129, &broadcast_call);
 	runicast_open(&runicast, 144, &runicast_calls);
 	printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
 	initialize();
@@ -27,9 +54,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 	while(true){
 		PROCESS_WAIT_EVENT();
 		if (etimer_expired(&blueTimer) && battery == LOW){    ///DO I HAVE TO REDUCE BATT HERE???
-	  		leds_toggle(LEDS_BLUE);
-	  		etimer_set(&blueTimer,CLOCK_SECOND*BLUE_PERIOD);
-	  		printf("Toggled blue leds\n");
+			toggleBlue();
 	  	}
 	  	if (etimer_expired(&senseTimer)){
 	  		sample.temp = getTemperature();
@@ -47,6 +72,8 @@ PROCESS_THREAD(traffic_light, ev, data){
 	  	if (ev == sensors_event && data == &button_sensor){
 	  		rechargeBattery();
 	  	}
+	  	if(etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
+	  		toggleLights();
 	}
 	SENSORS_DEACTIVATE(button_sensor);
 

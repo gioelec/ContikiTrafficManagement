@@ -1,4 +1,4 @@
-#include "../header.h"
+#include "../g.h"
 #include "dev/serial-line.h"
 #include <stdlib.h>
 
@@ -72,36 +72,50 @@ static void sent_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t
 
 static void timedout_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
 }
-//------BROADCAST CALLBACK 
-static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
-}
-
-static void broadcast_sent(struct broadcast_conn *c, int status, int num_tx){
-}
-//------BROADCAST STRUCT
-static const struct broadcast_callbacks broadcast_call = {broadcast_recv, broadcast_sent}; //Be careful to the order
-static struct broadcast_conn broadcast;
 
 //------RUNICAST STRUCT
 static const struct runicast_callbacks runicast_calls = {recv_runicast, sent_runicast, timedout_runicast};
 static struct runicast_conn runicast;
 
 
+
+void closeAll(){
+	//closes all the opened connection
+	runicast_close(&runicast);
+	broadcast_close(&broadcast);
+}
+
 //------PROCESS G1
 
 PROCESS_THREAD(g1, ev, data){
+  	PROCESS_EXITHANDLER(closeAll());
+  	//have to be together
+  	PROCESS_BEGIN();
+  	broadcast_open(&broadcast, 129, &broadcast_call);
+  	runicast_open(&runicast, 144, &runicast_calls);
+  	SENSORS_ACTIVATE(button_sensor);
 
-  PROCESS_EXITHANDLER(runicast_close(&runicast));
-
-  PROCESS_BEGIN();
-
-  runicast_open(&runicast, 144, &runicast_calls);
-
-  //This node is the receiver...IN THIS EXAMPLE, it waits forever and just reacts to received packets
-  PROCESS_WAIT_EVENT_UNTIL(0);
-
-  PROCESS_END();
+  	while(true){
+  		PROCESS_WAIT_EVENT();
+  		if (!stopped && ev == sensors_event && data == &button_sensor){
+  			stopped = true;
+  			etimer_set(&secondPressTimer,SECOND_PRESS*CLOCK_SECOND);
+  			printf("First time the button is pressed\n");
+			PROCESS_WAIT_EVENT();
+  			if (ev == sensors_event && data == &button_sensor){
+  				printf("Emegency vehicle detected\n");
+  				etimer_stop(&secondPressTimer);
+  				emergency = true;
+		  	}else if(etimer_expired(&secondPressTimer)){
+			  	printf("Normal vehicle detected\n");
+		  	}
+		  	sendBroadcast();
+		}
+   	}
+  	SENSORS_DEACTIVATE(button_sensor);
+  	PROCESS_END();
 }
+
 //------PROCESS keyboard_process
 PROCESS_THREAD(keyboard_process,ev,data){
 	PROCESS_BEGIN();
@@ -121,6 +135,4 @@ PROCESS_THREAD(keyboard_process,ev,data){
 		}
 	}
   	PROCESS_END();
-
-
 }
