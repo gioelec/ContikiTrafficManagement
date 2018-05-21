@@ -4,11 +4,6 @@
 
 
 
-PROCESS(traffic_light, "Traffic Light");
-
-AUTOSTART_PROCESSES(&traffic_light);
-
-
 //------FUNCTIONS
 
 //------BROADCAST CALLBACK 
@@ -34,13 +29,8 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 	}
 	printf("calling scheduleTraffic from receive\n");
 	if(!scheduleTimerRunning){  //first time the time scheduler might not be running
-		if( scheduleTraffic()){
-			gone = true;
-			printf("GREEN vehicle can proceed\n");
-		}else{
-			printf("RED vehicle cannot proceed\n");
-		}
-	}		  		
+		scheduleTraffic();
+	}	  		
 	process_post(&traffic_light, PROCESS_EVENT_MSG, NULL);
 }
 
@@ -93,6 +83,13 @@ PROCESS_THREAD(traffic_light, ev, data){
 	  	if (ev == sensors_event && data == &button_sensor){
 	  		rechargeBattery();
 	  	}*/
+	  	if(ev==PROCESS_EVENT_MSG && !scheduleTimerRunning){
+	  		printf("------scheduleTimer should expire in 5s\n" );
+	  		scheduleTimerRunning = true;
+			etimer_set(&scheduleTimer,SCHEDULE_PERIOD*CLOCK_SECOND);
+			if(gone)
+				sendNext(&g2Address);
+	  	}	  	
 	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer))//&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
 	  		toggleLights();
 	  	if(ev!=PROCESS_EVENT_MSG && etimer_expired(&scheduleTimer)&&scheduleTimerRunning){//&& )){
@@ -101,13 +98,6 @@ PROCESS_THREAD(traffic_light, ev, data){
 		  		scheduleTraffic();
 		  		printf("called\n");
 	  	}
-	  	if(ev==PROCESS_EVENT_MSG && !scheduleTimerRunning){
-	  		printf("------scheduleTimer should expire in 5s\n" );
-	  		scheduleTimerRunning = true;
-			etimer_set(&scheduleTimer,SCHEDULE_PERIOD*CLOCK_SECOND);
-			if(gone)
-				sendNext(&g2Address);
-	  	}	  	
 	}
 	SENSORS_DEACTIVATE(button_sensor);
 	PROCESS_END();

@@ -14,6 +14,15 @@
 #define SCHEDULE_PERIOD 5
 
 
+//------PROCESS STRUCTURE
+
+
+PROCESS(traffic_light, "Traffic Light");
+
+AUTOSTART_PROCESSES(&traffic_light);
+
+
+
 enum batteryState{
 	FULL,HALF,LOW,EMPTY
 };
@@ -127,50 +136,49 @@ void closeAll(){
 void turnGreen(){
 	leds_off(LEDS_RED);
 	leds_on(LEDS_GREEN);
-
+	gone = true;
+	printf("GREEN vehicle can proceed\n");
 }
 void turnRed(){
 	leds_off(LEDS_GREEN);
 	leds_on(LEDS_RED);
 	otherRoad = EMPTYROAD;
+	gone = false;
+	printf("RED vehicle cannot proceed\n");
+
 }
-bool scheduleTraffic(){
+void scheduleTraffic(){
 	printf("SCHEDULE TRAFFIC()\n");
 	if(otherRoad == EMPTYROAD && road == EMPTYROAD){
 		printf("Both roads are empty\n");
 		printf("calling toggle toggleLights\n");
 		leds_off(LEDS_RED|LEDS_GREEN);
 		toggleLights();
-		//etimer_stop(&scheduleTimer);
-		return false;
+		return;  //check here TODO post???----------shasdjasbfjbasjbfuasbfjabbfhasbfajsbfjasbfjbasjfjbasjfjajbsfbjabsfajsfasjbfjasbfasbfjba
 	}
-	if(otherRoad==EMPTYROAD && road != EMPTYROAD){
+	else if(otherRoad==EMPTYROAD && road != EMPTYROAD){
 		printf("other road empty\n");
 		turnGreen();
-		return true;
 	}
-	if(otherRoad!=EMPTYROAD && road == EMPTYROAD){
+	else if(otherRoad!=EMPTYROAD && road == EMPTYROAD){
 		printf("my road is empty\n");
 		turnRed();
-		return false;
 	}
-	if(otherRoad == road){///both normal or both emergency
+	else if(otherRoad == road){///both normal or both emergency
 		printf("roads in the same state\n");
 		if(mainRoad)
 			turnGreen();
 		else
 			turnRed();
-		return mainRoad;
 	}
-	if(road == EMERGENCY && otherRoad != EMERGENCY){ //emergency has an higher priority
+	else if(road == EMERGENCY && otherRoad != EMERGENCY){ //emergency has an higher priority
 		printf("my road has an emergency\n");
 		turnGreen();
-		return true;
 	}
-	if(road != EMERGENCY && otherRoad == EMERGENCY){ //emergency has an higher priority
+	else if(road != EMERGENCY && otherRoad == EMERGENCY){ //emergency has an higher priority
 		printf("other road has an emergency\n");
 		turnRed();
-		return false; 
 	}
-	return false;
+	process_post(&traffic_light, PROCESS_EVENT_MSG, NULL);
+
 }
