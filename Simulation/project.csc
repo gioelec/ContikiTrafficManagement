@@ -8,7 +8,7 @@
   <project EXPORT="discard">[APPS_DIR]/powertracker</project>
   <simulation>
     <title>Project</title>
-    <speedlimit>0.1</speedlimit>
+    <speedlimit>2.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
     <radiomedium>
@@ -191,8 +191,8 @@
     <width>280</width>
     <z>1</z>
     <height>160</height>
-    <location_x>400</location_x>
-    <location_y>0</location_y>
+    <location_x>403</location_x>
+    <location_y>8</location_y>
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Visualizer
@@ -205,7 +205,7 @@
       <viewport>3.400320880838905 0.0 0.0 3.400320880838905 -5.71837548899387 1.9031683149877212</viewport>
     </plugin_config>
     <width>400</width>
-    <z>0</z>
+    <z>4</z>
     <height>400</height>
     <location_x>1</location_x>
     <location_y>1</location_y>
@@ -218,8 +218,8 @@
       <coloring />
     </plugin_config>
     <width>1320</width>
-    <z>2</z>
-    <height>240</height>
+    <z>0</z>
+    <height>624</height>
     <location_x>400</location_x>
     <location_y>160</location_y>
   </plugin>
@@ -236,7 +236,7 @@
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
     <width>1720</width>
-    <z>6</z>
+    <z>8</z>
     <height>166</height>
     <location_x>0</location_x>
     <location_y>806</location_y>
@@ -248,7 +248,7 @@
       <decorations>true</decorations>
     </plugin_config>
     <width>1040</width>
-    <z>7</z>
+    <z>9</z>
     <height>160</height>
     <location_x>680</location_x>
     <location_y>0</location_y>
@@ -260,11 +260,11 @@
       <interface>Sky LED</interface>
       <scrollpos>0,0</scrollpos>
     </plugin_config>
-    <width>350</width>
-    <z>5</z>
-    <height>300</height>
-    <location_x>22</location_x>
-    <location_y>420</location_y>
+    <width>209</width>
+    <z>7</z>
+    <height>134</height>
+    <location_x>690</location_x>
+    <location_y>15</location_y>
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.MoteInterfaceViewer
@@ -273,11 +273,11 @@
       <interface>Sky LED</interface>
       <scrollpos>0,0</scrollpos>
     </plugin_config>
-    <width>350</width>
-    <z>4</z>
-    <height>300</height>
-    <location_x>388</location_x>
-    <location_y>420</location_y>
+    <width>189</width>
+    <z>6</z>
+    <height>123</height>
+    <location_x>903</location_x>
+    <location_y>18</location_y>
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.MoteInterfaceViewer
@@ -287,10 +287,36 @@
       <scrollpos>0,0</scrollpos>
     </plugin_config>
     <width>350</width>
-    <z>3</z>
+    <z>5</z>
     <height>300</height>
-    <location_x>766</location_x>
-    <location_y>418</location_y>
+    <location_x>1131</location_x>
+    <location_y>12</location_y>
+  </plugin>
+  <plugin>
+    org.contikios.cooja.plugins.MoteInterfaceViewer
+    <mote_arg>3</mote_arg>
+    <plugin_config>
+      <interface>Button</interface>
+      <scrollpos>0,0</scrollpos>
+    </plugin_config>
+    <width>350</width>
+    <z>2</z>
+    <height>106</height>
+    <location_x>15</location_x>
+    <location_y>576</location_y>
+  </plugin>
+  <plugin>
+    org.contikios.cooja.plugins.MoteInterfaceViewer
+    <mote_arg>2</mote_arg>
+    <plugin_config>
+      <interface>Button</interface>
+      <scrollpos>0,0</scrollpos>
+    </plugin_config>
+    <width>350</width>
+    <z>3</z>
+    <height>120</height>
+    <location_x>16</location_x>
+    <location_y>415</location_y>
   </plugin>
 </simconf>
 

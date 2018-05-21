@@ -26,7 +26,9 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 	printf("calling scheduleTraffic from receive\n");
 	if(!scheduleTimerRunning){  //first time the time scheduler might not be running
 		scheduleTraffic();
-	}
+	}else{
+		printf("SCHEDULING already ongoing\n");
+	}	
 
 }
 
