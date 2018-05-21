@@ -1,6 +1,6 @@
 #include "header.h"
 
-#define SECOND_PRESS 	2
+#define SECOND_PRESS 	0.5
 
 
 struct etimer secondPressTimer;
@@ -18,7 +18,7 @@ static const struct broadcast_callbacks broadcast_call = {broadcast_recv, broadc
 static struct broadcast_conn broadcast;
 
 //------FUNCTIONS
-char getEncoded(emergency){
+char getEncoded(bool emergency){
 	if(emergency)
 		return 'e';
 	return 'n';

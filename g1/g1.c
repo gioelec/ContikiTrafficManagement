@@ -57,10 +57,16 @@ void addMsg(char* data,int len){
 }
 //------RUNICAST CALLBACK
 static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
+	void * dataReceived = packetbuf_dataptr();
+	printf("runicast message received from %d.%d, seqno %d\n", from->u8[0], from->u8[1], seqno);
+	if(((char *)dataReceived)[0]=='n'){   
+		printf("RECEIVED: next\n");
+		stopped = false;
+		return;
+	}
 	int s = (int)from->u8[0];
 	int sender = (s==tl1Address.u8[0])?tl1Index:(s==tl2Address.u8[0])?tl2Index:g2Index;
-	printf("runicast message received from %d.%d, seqno %d\n", from->u8[0], from->u8[1], seqno);
-	struct sampleData* data = (struct sampleData*)packetbuf_dataptr();
+	struct sampleData* data = (struct sampleData*)dataReceived;
 	printf("RECEIVED: Temperature: %d, Humidity: %d\n",data->temp,data->hum);
 	addToBuffer(data,sender);
 	///if samples 4
@@ -75,7 +81,6 @@ static void timedout_runicast(struct runicast_conn *c, const linkaddr_t *to, uin
 
 //------RUNICAST STRUCT
 static const struct runicast_callbacks runicast_calls = {recv_runicast, sent_runicast, timedout_runicast};
-static struct runicast_conn runicast;
 
 
 
@@ -96,6 +101,7 @@ PROCESS_THREAD(g1, ev, data){
   	SENSORS_ACTIVATE(button_sensor);
 
   	while(true){
+  		printf("waiting for an event-----G1\n");
   		PROCESS_WAIT_EVENT();
   		if (!stopped && ev == sensors_event && data == &button_sensor){
   			stopped = true;

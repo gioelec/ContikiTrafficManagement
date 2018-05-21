@@ -21,7 +21,6 @@ enum roadState{
 	EMPTYROAD,NORMAL,EMERGENCY
 };
 //------VARIABLES
-struct etimer senseTimer;
 struct etimer blueTimer;
 struct etimer toggleTimer;
 struct etimer scheduleTimer;
@@ -33,7 +32,9 @@ enum roadState road       = EMPTYROAD;
 enum roadState otherRoad  = EMPTYROAD;
 int sensingPeriod		  = FULL_SENSE;
 bool blueStarted 		  =	false;
-struct sampleData sample  = {0,0};
+bool mainRoad 			  = false;
+bool gone				  = false;
+bool scheduleTimerRunning = false;
 //---RUNICAST CALLBACK
 static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
 }
@@ -50,7 +51,6 @@ static void broadcast_sent(struct broadcast_conn *c, int status, int num_tx){
 
 //------RUNICAST STRUCT
 static const struct runicast_callbacks runicast_calls = {recv_runicast, sent_runicast, timedout_runicast};
-static struct runicast_conn runicast;
 //------BROADCAST STRUCT
 static struct broadcast_conn broadcast;
 
@@ -63,6 +63,7 @@ void initialize(){
 	road = EMPTYROAD;
 	otherRoad = EMPTYROAD;
 	sensingPeriod = FULL_SENSE;
+	scheduleTimerRunning = false;
 }
 void consumeBattery(int v){
 	batteryLevel-=v;
@@ -95,12 +96,18 @@ void rechargeBattery(){
 		leds_off(LEDS_BLUE);
 	}
 }
-void sendData(){
+
+void sendNext(const linkaddr_t* recv){
+	printf("SENDING NEXT\n");
+	gone = false;
+	char c = 'n';
+	road=EMPTYROAD;
 	if(!runicast_is_transmitting(&runicast)) {
-	    packetbuf_copyfrom(&sample, sizeof(sample));
-	    printf("%u.%u: sending runicast to address %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1], g1Address.u8[0], g1Address.u8[1]);
-	    runicast_send(&runicast, &g1Address, MAX_RETRANSMISSIONS);
+	    packetbuf_copyfrom(&c, sizeof(c));
+	    printf("%u.%u: sending runicast to address %u.%u\n", recv->u8[0], recv->u8[1], g1Address.u8[0], g1Address.u8[1]);
+	    runicast_send(&runicast, recv, MAX_RETRANSMISSIONS);
 	}
+
 }
 void toggleLights(){
 	leds_toggle(LEDS_GREEN|LEDS_RED);
@@ -120,13 +127,50 @@ void closeAll(){
 void turnGreen(){
 	leds_off(LEDS_RED);
 	leds_on(LEDS_GREEN);
+
 }
 void turnRed(){
 	leds_off(LEDS_GREEN);
 	leds_on(LEDS_RED);
+	otherRoad = EMPTYROAD;
 }
-void scheduleTraffic(){
-	etimer_set(&scheduleTimer,CLOCK_SECOND*SCHEDULE_PERIOD);
-	if(otherRoad==EMPTYROAD && road != EMPTYROAD)
+bool scheduleTraffic(){
+	printf("SCHEDULE TRAFFIC()\n");
+	if(otherRoad == EMPTYROAD && road == EMPTYROAD){
+		printf("Both roads are empty\n");
+		printf("calling toggle toggleLights\n");
+		leds_off(LEDS_RED|LEDS_GREEN);
+		toggleLights();
+		//etimer_stop(&scheduleTimer);
+		return false;
+	}
+	if(otherRoad==EMPTYROAD && road != EMPTYROAD){
+		printf("other road empty\n");
 		turnGreen();
+		return true;
+	}
+	if(otherRoad!=EMPTYROAD && road == EMPTYROAD){
+		printf("my road is empty\n");
+		turnRed();
+		return false;
+	}
+	if(otherRoad == road){///both normal or both emergency
+		printf("roads in the same state\n");
+		if(mainRoad)
+			turnGreen();
+		else
+			turnRed();
+		return mainRoad;
+	}
+	if(road == EMERGENCY && otherRoad != EMERGENCY){ //emergency has an higher priority
+		printf("my road has an emergency\n");
+		turnGreen();
+		return true;
+	}
+	if(road != EMERGENCY && otherRoad == EMERGENCY){ //emergency has an higher priority
+		printf("other road has an emergency\n");
+		turnRed();
+		return false; 
+	}
+	return false;
 }

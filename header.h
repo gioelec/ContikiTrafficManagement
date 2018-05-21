@@ -17,6 +17,7 @@ struct sampleData {
 	int temp;
 	int hum;
 };
+struct sampleData sample  = {0,0};
 const int tl1Index = 0;
 const int tl2Index = 1;
 const int g2Index  = 3;
@@ -24,6 +25,12 @@ const linkaddr_t tl1Address = {{1,0}};
 const linkaddr_t tl2Address = {{2,0}};
 const linkaddr_t g1Address  = {{3,0}};
 const linkaddr_t g2Address  = {{4,0}};
+struct etimer senseTimer;
+
+
+
+static struct runicast_conn runicast;
+
 //----FUNCTIONS TO BE CALLED EXACTLY IN THIS SEQUENCE----------
 int getTemperature(){
 	SENSORS_ACTIVATE(sht11_sensor);
@@ -35,4 +42,11 @@ int getHumidity(){
 	return h;
 }
 
-
+void sendData(){
+	printf("SENDING DATA\n");
+	if(!runicast_is_transmitting(&runicast)) {
+	    packetbuf_copyfrom(&sample, sizeof(sample));
+	    printf("%u.%u: sending runicast to address %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1], g1Address.u8[0], g1Address.u8[1]);
+	    runicast_send(&runicast, &g1Address, MAX_RETRANSMISSIONS);
+	}
+}
