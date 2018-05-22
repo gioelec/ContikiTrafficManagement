@@ -50,7 +50,7 @@ PROCESS_THREAD(g2, ev, data){
   	broadcast_open(&broadcast, 129, &broadcast_call);
   	runicast_open(&runicast, 144, &runicast_calls);
   	SENSORS_ACTIVATE(button_sensor);
-  	//etimer_set(&)
+  	etimer_set(&senseTimer,SENSE_PERIOD*CLOCK_SECOND);
 
   	while(true){
   		printf("waiting for an event-----G2\n");
@@ -73,7 +73,7 @@ PROCESS_THREAD(g2, ev, data){
 			printf("G2 SENSED\n");
 	  		sample.temp = getTemperature();
 	  		sample.hum = getHumidity();
-	  		etimer_set(&senseTimer,SENSE_PERIOD*CLOCK_SECOND);
+	  		etimer_reset(&senseTimer);
 	  		printf("Sensed  temp: %d hum: %d \n",sample.temp,sample.hum);
 	  		sendData(sample);
 	  	}

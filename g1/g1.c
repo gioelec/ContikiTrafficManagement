@@ -33,6 +33,7 @@ void computeAverage(){
 	if(emergencyMsg){
 		printf("%s temp: %d hum: %d\n",emergencyMsg,t,h);
 		free(emergencyMsg);
+		emergencyMsg = NULL;
 	}else
 		printf("temp: %d hum: %d\n",t,h);
 
