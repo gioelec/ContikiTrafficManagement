@@ -1,0 +1,13 @@
+#!/bin/bash
+cd tl1
+make clean
+make TARGET=sky -j 9
+cd ../tl2
+make clean
+make TARGET=sky -j 9
+cd ../g1
+make clean
+make TARGET=sky -j 9
+cd ../g2
+make clean
+make TARGET=sky -j 9

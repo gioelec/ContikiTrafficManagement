@@ -52,16 +52,9 @@ PROCESS_THREAD(traffic_light, ev, data){
 	SENSORS_ACTIVATE(button_sensor);
 	while(true){
 		printf("Waiting for an event to occur\n");
-/*		printf("Schedule timer expiration:%d\n",(int)etimer_expiration_time(&scheduleTimer) );
-		if (etimer_pending()){
-			printf("Some timer will expire shortly\n");
-		}else{
-			printf("no timer pending\n");
-		}
-		printf("bool value : %d\n",scheduleTimerRunning);
-*/		PROCESS_WAIT_EVENT();
+		PROCESS_WAIT_EVENT();
 		printf("an event occurred\n");
-		/*if (etimer_expired(&blueTimer) && battery == LOW){    ///DO I HAVE TO REDUCE BATT HERE???
+		if (etimer_expired(&blueTimer) && battery == LOW){    ///DO I HAVE TO REDUCE BATT HERE???
 			toggleBlue();
 	  	}
 	  	if (etimer_expired(&senseTimer)){
@@ -80,7 +73,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 
 	  	if (ev == sensors_event && data == &button_sensor){
 	  		rechargeBattery();
-	  	}*/
+	  	}
 	  	if(ev==PROCESS_EVENT_MSG && !scheduleTimerRunning){
 	  		printf("------scheduleTimer should expire in 5s\n" );
 	  		scheduleTimerRunning = true;
@@ -88,10 +81,8 @@ PROCESS_THREAD(traffic_light, ev, data){
 			if(gone)
 				sendNext(&g1Address);
 	  	}	  	
-	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer)){//&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
+	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
 	  		toggleLights();
-	  		printf("toggleTimer event\n");
-	  	}
 	  	if(ev!=PROCESS_EVENT_MSG && etimer_expired(&scheduleTimer)&&scheduleTimerRunning){//&& )){
 		  		scheduleTimerRunning=false;
 		  		printf("calling schedule traffic from expiration\n");

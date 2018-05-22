@@ -9,6 +9,7 @@ PROCESS(g1, "G1111111");
 PROCESS(keyboard_process,"keyboard_process");
 
 AUTOSTART_PROCESSES(&g1,&keyboard_process);
+
 //------VARIABLES
 int 	humStore[QUEUESIZE];
 int 	tempStore[QUEUESIZE];
@@ -17,6 +18,7 @@ int 	remaining = 3;
 int 	myAddr = 3-1;
 char* 	emergencyMsg = NULL;//= {"EMERGENCY MESSAGE "};
 char 	psw[] = {"NES"};
+
 //------FUNCTIONS
 void computeAverage(){
 	int t=0,h =0,i=0;
@@ -135,8 +137,6 @@ PROCESS_THREAD(keyboard_process,ev,data){
 			printf("Type in the Emergency Warning\n");
 			PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
 			addMsg(data,(strlen(data)+1));
-			//emergencyMsg = (char *)malloc((strlen(data)+1)*sizeof(char));
-			//strcpy(emergencyMsg,(char*)data);
 			printf("you have inserted the following message%s\n", emergencyMsg);
 		}
 	}

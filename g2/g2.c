@@ -50,6 +50,7 @@ PROCESS_THREAD(g2, ev, data){
   	broadcast_open(&broadcast, 129, &broadcast_call);
   	runicast_open(&runicast, 144, &runicast_calls);
   	SENSORS_ACTIVATE(button_sensor);
+  	//etimer_set(&)
 
   	while(true){
   		printf("waiting for an event-----G2\n");
@@ -67,14 +68,15 @@ PROCESS_THREAD(g2, ev, data){
 			  	printf("Normal vehicle detected\n");
 		  	}
 		  	sendBroadcast();
-		}/*
+		}
 		if (etimer_expired(&senseTimer)){
+			printf("G2 SENSED\n");
 	  		sample.temp = getTemperature();
 	  		sample.hum = getHumidity();
 	  		etimer_set(&senseTimer,SENSE_PERIOD*CLOCK_SECOND);
 	  		printf("Sensed  temp: %d hum: %d \n",sample.temp,sample.hum);
 	  		sendData(sample);
-	  	}*/
+	  	}
    	}
   	SENSORS_DEACTIVATE(button_sensor);
   	PROCESS_END();
