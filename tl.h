@@ -78,7 +78,8 @@ void consumeBattery(int v){
 	batteryLevel-=v;
 	if(batteryLevel <= 0){
 		battery = EMPTY;
-		sensingPeriod = LOW_SENSE;//what TODO here
+		sensingPeriod = LOW_SENSE;
+		printf("BATTERY EMPTY\n");
 		return;
 	}
 	if(batteryLevel <= LOW_TH){

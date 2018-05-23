@@ -57,8 +57,14 @@ PROCESS_THREAD(traffic_light, ev, data){
 		printf("Waiting for an event to occur\n");
 		PROCESS_WAIT_EVENT();
 		printf("an event occurred\n");
-		if (etimer_expired(&blueTimer) && battery == LOW){    ///DO I HAVE TO REDUCE BATT HERE???
-			toggleBlue();
+		if (etimer_expired(&blueTimer)){    
+			if(battery==LOW){
+				toggleBlue();
+				return;
+			}
+			if(battery==EMPTY){
+				leds_on(LEDS_BLUE);
+			}
 	  	}
 	  	if (etimer_expired(&senseTimer)){
 	  		sample.temp = getTemperature();

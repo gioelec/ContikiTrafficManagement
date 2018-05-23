@@ -50,8 +50,7 @@ PROCESS_THREAD(g2, ev, data){
   	broadcast_open(&broadcast, 129, &broadcast_call);
   	runicast_open(&runicast, 144, &runicast_calls);
   	SENSORS_ACTIVATE(button_sensor);
-  	etimer_set(&senseTimer,SENSE_PERIOD*CLOCK_SECOND);
-
+  	etimer_set(&senseTimer,SENSE_PERIOD*CLOCK_SECOND); // every 5 seconds connected to the elecrticity supply
   	while(true){
   		printf("waiting for an event-----G2\n");
   		PROCESS_WAIT_EVENT();

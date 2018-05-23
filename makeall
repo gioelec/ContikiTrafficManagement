@@ -1,13 +1,22 @@
 #!/bin/bash
+chmod u+rwx run
+chmod u+rwx tl.h
+chmod u+rwx header.h
+chmod u+rwx g.h
 cd tl1
+chmod u+rwx Makefile
 make clean
 make TARGET=sky -j 9
 cd ../tl2
+chmod u+rwx Makefile
 make clean
 make TARGET=sky -j 9
 cd ../g1
+chmod u+rwx Makefile
 make clean
 make TARGET=sky -j 9
 cd ../g2
+chmod u+rwx Makefile
 make clean
 make TARGET=sky -j 9
+

@@ -8,6 +8,7 @@
   <project EXPORT="discard">[APPS_DIR]/powertracker</project>
   <simulation>
     <title>project</title>
+    <speedlimit>1.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
     <radiomedium>
@@ -164,6 +165,10 @@
         org.contikios.cooja.mspmote.interfaces.MspMoteID
         <id>3</id>
       </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspSerial
+        <history>sahdjshajdhasdDDDDDDDDDdd~;NES~;</history>
+      </interface_config>
       <motetype_identifier>sky3</motetype_identifier>
     </mote>
     <mote>
@@ -188,7 +193,7 @@
   <plugin>
     org.contikios.cooja.plugins.SimControl
     <width>280</width>
-    <z>9</z>
+    <z>0</z>
     <height>160</height>
     <location_x>400</location_x>
     <location_y>0</location_y>
@@ -204,7 +209,7 @@
       <viewport>3.6577478798272414 0.0 0.0 3.6577478798272414 -37.818895242878845 69.5477398244331</viewport>
     </plugin_config>
     <width>400</width>
-    <z>2</z>
+    <z>1</z>
     <height>400</height>
     <location_x>1</location_x>
     <location_y>1</location_y>
@@ -217,7 +222,7 @@
       <coloring />
     </plugin_config>
     <width>1320</width>
-    <z>6</z>
+    <z>7</z>
     <height>702</height>
     <location_x>400</location_x>
     <location_y>160</location_y>
@@ -235,7 +240,7 @@
       <zoomfactor>500.0</zoomfactor>
     </plugin_config>
     <width>1720</width>
-    <z>8</z>
+    <z>9</z>
     <height>166</height>
     <location_x>0</location_x>
     <location_y>862</location_y>
@@ -247,7 +252,7 @@
       <decorations>true</decorations>
     </plugin_config>
     <width>1040</width>
-    <z>7</z>
+    <z>8</z>
     <height>160</height>
     <location_x>680</location_x>
     <location_y>0</location_y>
@@ -260,7 +265,7 @@
       <scrollpos>0,0</scrollpos>
     </plugin_config>
     <width>350</width>
-    <z>5</z>
+    <z>6</z>
     <height>135</height>
     <location_x>687</location_x>
     <location_y>25</location_y>
@@ -273,7 +278,7 @@
       <scrollpos>0,0</scrollpos>
     </plugin_config>
     <width>350</width>
-    <z>4</z>
+    <z>5</z>
     <height>126</height>
     <location_x>1037</location_x>
     <location_y>25</location_y>
@@ -286,7 +291,7 @@
       <scrollpos>0,0</scrollpos>
     </plugin_config>
     <width>350</width>
-    <z>3</z>
+    <z>4</z>
     <height>300</height>
     <location_x>1386</location_x>
     <location_y>25</location_y>
@@ -299,7 +304,7 @@
       <scrollpos>0,0</scrollpos>
     </plugin_config>
     <width>350</width>
-    <z>1</z>
+    <z>2</z>
     <height>130</height>
     <location_x>15</location_x>
     <location_y>628</location_y>
@@ -312,7 +317,7 @@
       <scrollpos>0,0</scrollpos>
     </plugin_config>
     <width>350</width>
-    <z>0</z>
+    <z>3</z>
     <height>131</height>
     <location_x>15</location_x>
     <location_y>490</location_y>
