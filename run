@@ -1,0 +1,9 @@
+#!/bin/bash
+DIR=$1
+echo $DIR
+cd $DIR
+make TARGET=sky clean
+make TARGET=sky -j 9
+make TARGET=sky $DIR.upload
+make TARGET=sky login
+

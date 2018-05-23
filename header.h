@@ -21,10 +21,18 @@ struct sampleData sample  = {0,0};
 const int tl1Index = 0;
 const int tl2Index = 1;
 const int g2Index  = 3;
+/*
+const linkaddr_t tl1Address = {{2,0}};
+const linkaddr_t tl2Address = {{45,0}};
+const linkaddr_t g1Address  = {{50,0}};
+const linkaddr_t g2Address  = {{51,0}};*/
+//COOJA ADDRESSES
+
 const linkaddr_t tl1Address = {{1,0}};
 const linkaddr_t tl2Address = {{2,0}};
 const linkaddr_t g1Address  = {{3,0}};
 const linkaddr_t g2Address  = {{4,0}};
+
 struct etimer senseTimer;
 
 
