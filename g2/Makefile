@@ -2,7 +2,7 @@ CONTIKI_PROJECT = g2
 
 all: $(CONTIKI_PROJECT)
 
-CONTIKI = /home/user/contiki
+CONTIKI = ../../../
 
 CONTIKI_WITH_RIME = 1
 
