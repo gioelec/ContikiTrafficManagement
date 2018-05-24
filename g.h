@@ -24,7 +24,7 @@ char getEncoded(bool emergency){
 	return 'n';
 }
 void sendBroadcast(){
-	char c = getEncoded(emergency); //in order to send less bytes
+	char c = getEncoded(emergency); //in order to send less bytes int->char
 	packetbuf_copyfrom(&c, sizeof(c));
     broadcast_send(&broadcast);
     emergency = false;

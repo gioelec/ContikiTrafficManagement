@@ -24,7 +24,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 		}
 	}
 	printf("calling scheduleTraffic from receive\n");
-	if(!scheduleTimerRunning){  //first time the time scheduler might not be running
+	if(!scheduleTimerRunning){  //we have to check that we are not already in a scheduled situation otherwise wait the scheduling timer to expire
 		scheduleTraffic();
 	}else{
 		printf("SCHEDULING already ongoing\n");
@@ -51,9 +51,9 @@ PROCESS_THREAD(traffic_light, ev, data){
 	//etimer_set(&senseTimer,sensingPeriod*CLOCK_SECOND);
 	SENSORS_ACTIVATE(button_sensor);
 	while(true){
-		printf("Waiting for an event to occur\n");
+		//printf("Waiting for an event to occur\n");
 		PROCESS_WAIT_EVENT();
-		printf("an event occurred\n");
+		//printf("an event occurred\n");
 		if (etimer_expired(&blueTimer)){    
 			if(battery==LOW){
 				toggleBlue();
@@ -76,7 +76,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 	  		sendData(sample);
 	  	}
 
-	  	if (ev == sensors_event && data == &button_sensor){
+	  	if (ev == sensors_event && data == &button_sensor){   
 	  		rechargeBattery();
 	  	}
 	  	if(ev==PROCESS_EVENT_MSG && !scheduleTimerRunning){

@@ -1,16 +1,22 @@
 #include "header.h"
 #include "dev/leds.h"
+
+//toggling semiperiod
 #define SEMI_PERIOD 	1
-#define ON_PERIOD 		5
+//battery costants
 #define FULL_TH    		100
 #define HALF_TH    		50
 #define LOW_TH			20
 #define TOGGLE_COST		5
 #define SENSE_COST 		10
+//blue leds toggling period
 #define BLUE_PERIOD		2
-#define HALF_SENSE		10 //defines period of sensing with half battery
+//sensing costants
+#define HALF_SENSE		10 
 #define FULL_SENSE		5
 #define LOW_SENSE 		20
+#define EMPTY_SENSE     60
+//scheduling traffic period
 #define SCHEDULE_PERIOD 5
 
 
@@ -66,7 +72,7 @@ static struct broadcast_conn broadcast;
 
 //------FUNCTIONS
 void initialize(){
-	etimer_set(&toggleTimer,CLOCK_SECOND);
+	etimer_set(&toggleTimer,SEMI_PERIOD*CLOCK_SECOND);
 	batteryLevel=100;
 	battery = FULL;
 	road = EMPTYROAD;
@@ -74,12 +80,12 @@ void initialize(){
 	sensingPeriod = FULL_SENSE;
 	scheduleTimerRunning = false;
 }
+
 void consumeBattery(int v){
 	batteryLevel-=v;
 	if(batteryLevel <= 0){
 		battery = EMPTY;
-		sensingPeriod = LOW_SENSE;
-		printf("BATTERY EMPTY\n");
+		sensingPeriod = EMPTY_SENSE;
 		return;
 	}
 	if(batteryLevel <= LOW_TH){
@@ -99,15 +105,15 @@ void consumeBattery(int v){
 	}
 }
 void rechargeBattery(){
-	consumeBattery(batteryLevel-FULL_TH);
-	if(blueStarted){
+	consumeBattery(batteryLevel-FULL_TH); //negative consume consists in a recharge
+	if(blueStarted){					  //if we were in the low state we should disable bluetoggling
 		etimer_stop(&blueTimer);
 		blueStarted = false;
 		leds_off(LEDS_BLUE);
 	}
 }
 
-void sendNext(const linkaddr_t* recv){
+void sendNext(const linkaddr_t* recv){	 //tells to corresponding g sensor that another car can come
 	printf("SENDING NEXT\n");
 	gone = false;
 	char c = 'n';
@@ -121,7 +127,7 @@ void sendNext(const linkaddr_t* recv){
 }
 void toggleLights(){
 	leds_toggle(LEDS_GREEN|LEDS_RED);
-	etimer_set(&toggleTimer,CLOCK_SECOND);
+	etimer_set(&toggleTimer,CLOCK_SECOND*SEMI_PERIOD);
 	consumeBattery(5);
 }
 void toggleBlue(){
@@ -129,15 +135,14 @@ void toggleBlue(){
 	etimer_set(&blueTimer,CLOCK_SECOND*BLUE_PERIOD);
 	printf("Toggled blue leds\n");
 }
-void closeAll(){
-	//closes all the opened connection
+void closeAll(){	//closes all the opened connection
 	runicast_close(&runicast);
 	broadcast_close(&broadcast);
 }
 void turnGreen(){
 	leds_off(LEDS_RED);
 	leds_on(LEDS_GREEN);
-	gone = true;
+	gone = true;							//one vehicle has left the stop
 	printf("GREEN vehicle can proceed\n");
 }
 void turnRed(){
@@ -155,8 +160,7 @@ void scheduleTraffic(){
 		printf("calling toggle toggleLights\n");
 		leds_off(LEDS_RED|LEDS_GREEN);
 		toggleLights();
-		return;  //check here TODO post???----------shasdjasbfjbasjbfuasbfjabbfhasbfajsbfjasbfjbasjfjbasjfjajbsfbjabsfajsfasjbfjasbfasbfjba
-	}
+		return;  	}
 	else if(otherRoad==EMPTYROAD && road != EMPTYROAD){
 		printf("other road empty\n");
 		turnGreen();
@@ -165,7 +169,7 @@ void scheduleTraffic(){
 		printf("my road is empty\n");
 		turnRed();
 	}
-	else if(otherRoad == road){///both normal or both emergency
+	else if(otherRoad == road){					//both normal or both emergency
 		printf("roads in the same state\n");
 		if(mainRoad)
 			turnGreen();

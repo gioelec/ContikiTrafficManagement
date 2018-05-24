@@ -18,20 +18,23 @@ struct sampleData {
 	int hum;
 };
 struct sampleData sample  = {0,0};
+
+//indexes in the vector of each sensor
 const int tl1Index = 0;
 const int tl2Index = 1;
 const int g2Index  = 3;
-/*
+
+//addresses of each node
 const linkaddr_t tl1Address = {{2,0}};
 const linkaddr_t tl2Address = {{45,0}};
 const linkaddr_t g1Address  = {{50,0}};
-const linkaddr_t g2Address  = {{51,0}};*/
+const linkaddr_t g2Address  = {{51,0}};
 //COOJA ADDRESSES
-
+/*
 const linkaddr_t tl1Address = {{1,0}};
 const linkaddr_t tl2Address = {{2,0}};
 const linkaddr_t g1Address  = {{3,0}};
-const linkaddr_t g2Address  = {{4,0}};
+const linkaddr_t g2Address  = {{4,0}};*/
 
 struct etimer senseTimer;
 
@@ -50,8 +53,7 @@ int getHumidity(){
 	return h;
 }
 
-void sendData(){
-	printf("SENDING DATA\n");
+void sendData(){ //Sends the sensed data in runicast to the sink
 	if(!runicast_is_transmitting(&runicast)) {
 	    packetbuf_copyfrom(&sample, sizeof(sample));
 	    printf("%u.%u: sending runicast to address %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1], g1Address.u8[0], g1Address.u8[1]);
