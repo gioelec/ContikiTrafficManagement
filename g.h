@@ -6,18 +6,19 @@
 struct etimer secondPressTimer;
 bool stopped = false; //determines wether a vehicle is already at the stop
 bool emergency=false;
-
+/*)
 //------BROADCAST CALLBACK 
 static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 }
 
 static void broadcast_sent(struct broadcast_conn *c, int status, int num_tx){
-}
+}*/
 //------BROADCAST STRUCT
-static const struct broadcast_callbacks broadcast_call = {broadcast_recv, broadcast_sent}; //Be careful to the order
+static const struct broadcast_callbacks broadcast_call = {}; //Be careful to the order
 static struct broadcast_conn broadcast;
 
 //------FUNCTIONS
+//from a boolean returns the corresponding letter n(ormal) or e(mergency)
 char getEncoded(bool emergency){
 	if(emergency)
 		return 'e';

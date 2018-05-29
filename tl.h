@@ -45,9 +45,9 @@ enum batteryState battery = FULL;
 int batteryLevel          = 100;
 enum roadState road       = EMPTYROAD;
 enum roadState otherRoad  = EMPTYROAD;
-int sensingPeriod		  = FULL_SENSE;
+int sensingPeriod		  = FULL_SENSE; //variable modified when battery is decremented
 bool blueStarted 		  =	false;
-bool mainRoad 			  = false;
+bool mainRoad 			  = false;		//states wether the road is the main one or not
 bool gone				  = false;
 bool scheduleTimerRunning = false;
 //---RUNICAST CALLBACK
@@ -58,9 +58,6 @@ static void sent_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t
 }
 
 static void timedout_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
-}
-//------BROADCAST CALLBACK
-static void broadcast_sent(struct broadcast_conn *c, int status, int num_tx){
 }
 
 
@@ -84,6 +81,7 @@ void initialize(){
 void consumeBattery(int v){
 	batteryLevel-=v;
 	if(batteryLevel <= 0){
+		batteryLevel=0;
 		battery = EMPTY;
 		sensingPeriod = EMPTY_SENSE;
 		return;

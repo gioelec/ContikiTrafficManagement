@@ -5,7 +5,7 @@
 
 #define QUEUESIZE 4
 
-PROCESS(g1, "G1111111");
+PROCESS(g1, "G1");
 PROCESS(keyboard_process,"keyboard_process");
 
 AUTOSTART_PROCESSES(&g1,&keyboard_process);
@@ -61,29 +61,24 @@ void addMsg(char* data,int len){
 //------RUNICAST CALLBACK
 static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
 	void * dataReceived = packetbuf_dataptr();
-	printf("runicast message received from %d.%d, seqno %d\n", from->u8[0], from->u8[1], seqno);
+	//printf("runicast message received from %d.%d, seqno %d\n", from->u8[0], from->u8[1], seqno);
 	if(((char *)dataReceived)[0]=='n'){   
-		printf("RECEIVED: next\n");
+		printf("RECEIVED: next from: %d.%d\n",from->u8[0], from->u8[1]);
 		stopped = false;
 		return;
 	}
 	int s = (int)from->u8[0];
-	int sender = (s==tl1Address.u8[0])?tl1Index:(s==tl2Address.u8[0])?tl2Index:g2Index;
+	int sender = (s==tl1Address.u8[0])?tl1Index:(s==tl2Address.u8[0])?tl2Index:g2Index; //to determine which node and the corresponding index
 	struct sampleData* data = (struct sampleData*)dataReceived;
-	printf("RECEIVED: Temperature: %d, Humidity: %d\n",data->temp,data->hum);
+	printf("RECEIVED: Temperature: %d, Humidity: %d from: %d.%d\n",data->temp,data->hum,from->u8[0], from->u8[1]);
 	addToBuffer(data,sender);
 	///if samples 4
 	//process_post(&g1, PROCESS_EVENT_MSG, NULL);
 }
 
-static void sent_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
-}
-
-static void timedout_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
-}
 
 //------RUNICAST STRUCT
-static const struct runicast_callbacks runicast_calls = {recv_runicast, sent_runicast, timedout_runicast};
+static const struct runicast_callbacks runicast_calls = {recv_runicast};
 
 
 
@@ -99,12 +94,13 @@ PROCESS_THREAD(g1, ev, data){
   	PROCESS_EXITHANDLER(closeAll());
   	//have to be together
   	PROCESS_BEGIN();
+  	printVersion();
+
   	broadcast_open(&broadcast, 129, &broadcast_call);
   	runicast_open(&runicast, 144, &runicast_calls);
   	SENSORS_ACTIVATE(button_sensor);
 
   	while(true){
-  		printf("waiting for an event-----G1\n");
   		PROCESS_WAIT_EVENT();
   		if (!stopped && ev == sensors_event && data == &button_sensor){
   			stopped = true;
@@ -125,7 +121,7 @@ PROCESS_THREAD(g1, ev, data){
   	PROCESS_END();
 }
 
-//------PROCESS keyboard_process
+//------PROCESS one more process is needed for avoiding waiting for the user response
 PROCESS_THREAD(keyboard_process,ev,data){
 	PROCESS_BEGIN();
   	while(1){
@@ -138,7 +134,7 @@ PROCESS_THREAD(keyboard_process,ev,data){
 			printf("Type in the Emergency Warning\n");
 			PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
 			addMsg(data,(strlen(data)+1));
-			printf("you have inserted the following message%s\n", emergencyMsg);
+			printf("you have inserted the following message: %s\n", emergencyMsg);
 		}
 	}
   	PROCESS_END();

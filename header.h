@@ -9,7 +9,7 @@
 #define MAX_RETRANSMISSIONS 5
 #define true 				1
 #define false 				0
-
+#define COOJA
 
 typedef int bool;
 
@@ -25,17 +25,18 @@ const int tl2Index = 1;
 const int g2Index  = 3;
 
 //addresses of each node
-const linkaddr_t tl1Address = {{2,0}};
-const linkaddr_t tl2Address = {{45,0}};
-const linkaddr_t g1Address  = {{50,0}};
-const linkaddr_t g2Address  = {{51,0}};
-//COOJA ADDRESSES
-/*
-const linkaddr_t tl1Address = {{1,0}};
-const linkaddr_t tl2Address = {{2,0}};
-const linkaddr_t g1Address  = {{3,0}};
-const linkaddr_t g2Address  = {{4,0}};*/
-
+#ifndef COOJA
+	const linkaddr_t tl1Address = {{2,0}};
+	const linkaddr_t tl2Address = {{45,0}};
+	const linkaddr_t g1Address  = {{50,0}};
+	const linkaddr_t g2Address  = {{51,0}};
+#else
+	//COOJA ADDRESSES
+	const linkaddr_t tl1Address = {{1,0}};
+	const linkaddr_t tl2Address = {{2,0}};
+	const linkaddr_t g1Address  = {{3,0}};
+	const linkaddr_t g2Address  = {{4,0}};
+#endif
 struct etimer senseTimer;
 
 
@@ -43,6 +44,9 @@ struct etimer senseTimer;
 static struct runicast_conn runicast;
 
 //----FUNCTIONS TO BE CALLED EXACTLY IN THIS SEQUENCE----------
+void printVersion(){
+	printf("Firmware version: 1.1\n");
+}
 int getTemperature(){
 	SENSORS_ACTIVATE(sht11_sensor);
 	return ((sht11_sensor.value(SHT11_SENSOR_TEMP)/10-396)/10);

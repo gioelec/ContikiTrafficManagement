@@ -33,7 +33,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 }
 
 //------BROADCAST STRUCT
-static const struct broadcast_callbacks broadcast_call = {broadcast_recv, broadcast_sent}; //Be careful to the order
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv}; //Be careful to the order
 
 
 
@@ -43,6 +43,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 	mainRoad = true;
 	PROCESS_EXITHANDLER(closeAll());
 	PROCESS_BEGIN();
+	printVersion();
 	broadcast_open(&broadcast, 129, &broadcast_call);
 	runicast_open(&runicast, 144, &runicast_calls);
 	printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
@@ -57,9 +58,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 		if (etimer_expired(&blueTimer)){    
 			if(battery==LOW){
 				toggleBlue();
-				return;
-			}
-			if(battery==EMPTY)
+			}else if(battery==EMPTY)
 				leds_on(LEDS_BLUE);
 	  	}
 	  	if (etimer_expired(&senseTimer)){
@@ -76,7 +75,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 	  		sendData(sample);
 	  	}
 
-	  	if (ev == sensors_event && data == &button_sensor){   
+	  	if (ev == sensors_event && data == &button_sensor){
 	  		rechargeBattery();
 	  	}
 	  	if(ev==PROCESS_EVENT_MSG && !scheduleTimerRunning){
@@ -86,9 +85,9 @@ PROCESS_THREAD(traffic_light, ev, data){
 			if(gone)
 				sendNext(&g1Address);
 	  	}	  	
-	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
+	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD )
 	  		toggleLights();
-	  	if(ev!=PROCESS_EVENT_MSG && etimer_expired(&scheduleTimer)&&scheduleTimerRunning){//&& )){
+	  	if(ev!=PROCESS_EVENT_MSG && etimer_expired(&scheduleTimer)&&scheduleTimerRunning){
 		  		scheduleTimerRunning=false;
 		  		printf("calling schedule traffic from expiration\n");
 		  		scheduleTraffic();

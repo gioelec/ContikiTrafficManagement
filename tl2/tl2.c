@@ -9,6 +9,7 @@
 //------BROADCAST CALLBACK 
 static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 	bool isNormal = (((char *)packetbuf_dataptr())[0]=='n');
+	printVersion();
 	printf("TL2 RECEIVE: broadcast message received from %d.%d: '%s'\n", from->u8[0], from->u8[1], (char *)packetbuf_dataptr());
 	if(linkaddr_cmp(from,&g2Address)){
 		if(isNormal){
@@ -36,7 +37,7 @@ static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
 }
 
 //------BROADCAST STRUCT
-static const struct broadcast_callbacks broadcast_call = {broadcast_recv, broadcast_sent}; //Be careful to the order
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv}; //Be careful to the order
 
 
 
@@ -60,9 +61,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 		if (etimer_expired(&blueTimer)){    
 			if(battery==LOW){
 				toggleBlue();
-				return;
-			}
-			if(battery==EMPTY){
+			}else if(battery==EMPTY){
 				leds_on(LEDS_BLUE);
 			}
 	  	}
@@ -90,7 +89,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 			if(gone)
 				sendNext(&g2Address);
 	  	}	  	
-	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD && batteryLevel>LOW_TH)
+	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD)
 	  		toggleLights();
 	  	if(ev!=PROCESS_EVENT_MSG && etimer_expired(&scheduleTimer)&&scheduleTimerRunning){//&& )){
 		  		scheduleTimerRunning=false;

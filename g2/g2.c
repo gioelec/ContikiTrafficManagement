@@ -23,14 +23,8 @@ static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8
 	}
 }
 
-static void sent_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
-}
-
-static void timedout_runicast(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
-}
-
 //------RUNICAST STRUCT
-static const struct runicast_callbacks runicast_calls = {recv_runicast, sent_runicast, timedout_runicast};
+static const struct runicast_callbacks runicast_calls = {recv_runicast};
 static struct runicast_conn runicast;
 
 
