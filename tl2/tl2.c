@@ -51,13 +51,9 @@ PROCESS_THREAD(traffic_light, ev, data){
 	runicast_open(&runicast, 144, &runicast_calls);
 	printf("The Rime address of TL2 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
 	initialize();
-	printf("process beginned\n");
-	//etimer_set(&senseTimer,sensingPeriod*CLOCK_SECOND);
 	SENSORS_ACTIVATE(button_sensor);
 	while(true){
-		printf("Waiting for an event to occur\n");
 		PROCESS_WAIT_EVENT();
-		printf("an event occurred\n");
 		if (etimer_expired(&blueTimer)){    
 			if(battery==LOW){
 				toggleBlue();
@@ -83,7 +79,6 @@ PROCESS_THREAD(traffic_light, ev, data){
 	  		rechargeBattery();
 	  	}
 	  	if(ev==PROCESS_EVENT_MSG && !scheduleTimerRunning){
-	  		printf("------scheduleTimer should expire in 5s\n" );
 	  		scheduleTimerRunning = true;
 			etimer_set(&scheduleTimer,SCHEDULE_PERIOD*CLOCK_SECOND);
 			if(gone)
@@ -93,9 +88,7 @@ PROCESS_THREAD(traffic_light, ev, data){
 	  		toggleLights();
 	  	if(ev!=PROCESS_EVENT_MSG && etimer_expired(&scheduleTimer)&&scheduleTimerRunning){//&& )){
 		  		scheduleTimerRunning=false;
-		  		printf("calling schedule traffic from expiration\n");
 		  		scheduleTraffic();
-		  		printf("called\n");
 	  	}
 	}
 	SENSORS_DEACTIVATE(button_sensor);

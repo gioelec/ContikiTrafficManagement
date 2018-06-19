@@ -104,6 +104,7 @@ void consumeBattery(int v){
 }
 void rechargeBattery(){
 	consumeBattery(batteryLevel-FULL_TH); //negative consume consists in a recharge
+	etimer_set(&senseTimer,sensingPeriod); //to avoid sensing with a lower rate the first time
 	if(blueStarted){					  //if we were in the low state we should disable bluetoggling
 		etimer_stop(&blueTimer);
 		blueStarted = false;
