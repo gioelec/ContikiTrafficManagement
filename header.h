@@ -38,15 +38,13 @@ const int g2Index  = 3;
 	const linkaddr_t g2Address  = {{4,0}};
 #endif
 struct etimer senseTimer;
+bool runicastExist=true;
 
 
 
 static struct runicast_conn runicast;
 
 //----FUNCTIONS TO BE CALLED EXACTLY IN THIS SEQUENCE----------
-void printVersion(){
-	printf("Firmware version: 1.1\n");
-}
 int getTemperature(){
 	SENSORS_ACTIVATE(sht11_sensor);
 	return ((sht11_sensor.value(SHT11_SENSOR_TEMP)/10-396)/10);
@@ -58,9 +56,9 @@ int getHumidity(){
 }
 
 void sendData(){ //Sends the sensed data in runicast to the sink
-	if(!runicast_is_transmitting(&runicast)) {
+	if( !runicast_is_transmitting(&runicast)) {
 	    packetbuf_copyfrom(&sample, sizeof(sample));
-	    printf("%u.%u: sending runicast to address %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1], g1Address.u8[0], g1Address.u8[1]);
+	    //printf("%u.%u: sending runicast to address %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1], g1Address.u8[0], g1Address.u8[1]);
 	    runicast_send(&runicast, &g1Address, MAX_RETRANSMISSIONS);
 	}
 }

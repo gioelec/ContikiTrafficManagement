@@ -16,7 +16,7 @@ int 	tempStore[QUEUESIZE];
 bool 	received[QUEUESIZE];
 int 	remaining = 3;
 int 	myAddr = 3-1;
-char* 	emergencyMsg = NULL;//= {"EMERGENCY MESSAGE "};
+char* 	emergencyMsg = NULL;
 char 	psw[] = {"NES"};
 
 //------FUNCTIONS
@@ -44,7 +44,7 @@ void addToBuffer(struct sampleData * data, int sender){
 	if(!received[sender]){
 		received[sender] = true;
 		remaining--;
-		printf("REMAINING SAMPLES: %d\n",remaining );
+		//printf("REMAINING SAMPLES: %d\n",remaining );
 		if(remaining<=0){
 			tempStore[myAddr] = getTemperature();
 			humStore[myAddr] = getHumidity();
@@ -53,7 +53,7 @@ void addToBuffer(struct sampleData * data, int sender){
 	}
 }
 void addMsg(char* data,int len){
-	if(len<=1)					//VOID INPUT ? SHOULD BE HANDLED IN THIS WAY???
+	if(len<=0)					//VOID INPUT 
 		return;
 	emergencyMsg = (char *)malloc(len*sizeof(char));
 	strcpy(emergencyMsg,data);
@@ -62,18 +62,16 @@ void addMsg(char* data,int len){
 static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
 	void * dataReceived = packetbuf_dataptr();
 	//printf("runicast message received from %d.%d, seqno %d\n", from->u8[0], from->u8[1], seqno);
-	if(((char *)dataReceived)[0]=='n'){   
-		printf("RECEIVED: next from: %d.%d\n",from->u8[0], from->u8[1]);
-		stopped = false;
-		return;
-	}
+	//if(((char *)dataReceived)[0]=='n'){   
+	//	printf("RECEIVED: next from: %d.%d\n",from->u8[0], from->u8[1]);
+	//	stopped = false;
+	//	return;
+	//}
 	int s = (int)from->u8[0];
 	int sender = (s==tl1Address.u8[0])?tl1Index:(s==tl2Address.u8[0])?tl2Index:g2Index; //to determine which node and the corresponding index
 	struct sampleData* data = (struct sampleData*)dataReceived;
-	printf("RECEIVED: Temperature: %d, Humidity: %d from: %d.%d\n",data->temp,data->hum,from->u8[0], from->u8[1]);
+	//printf("RECEIVED: Temperature: %d, Humidity: %d from: %d.%d\n",data->temp,data->hum,from->u8[0], from->u8[1]);
 	addToBuffer(data,sender);
-	///if samples 4
-	//process_post(&g1, PROCESS_EVENT_MSG, NULL);
 }
 
 
@@ -94,7 +92,6 @@ PROCESS_THREAD(g1, ev, data){
   	PROCESS_EXITHANDLER(closeAll());
   	//have to be together
   	PROCESS_BEGIN();
-  	printVersion();
 
   	broadcast_open(&broadcast, 129, &broadcast_call);
   	runicast_open(&runicast, 144, &runicast_calls);
@@ -102,17 +99,18 @@ PROCESS_THREAD(g1, ev, data){
 
   	while(true){
   		PROCESS_WAIT_EVENT();
-  		if (!stopped && ev == sensors_event && data == &button_sensor){
-  			stopped = true;
+  		//if (!stopped && ev == sensors_event && data == &button_sensor){
+  		if (ev == sensors_event && data == &button_sensor){
+  			//stopped = true;
   			etimer_set(&secondPressTimer,SECOND_PRESS*CLOCK_SECOND);
-  			printf("First time the button is pressed\n");
+  			//printf("First time the button is pressed\n");
 			PROCESS_WAIT_EVENT();
   			if (ev == sensors_event && data == &button_sensor){
-  				printf("Emegency vehicle detected\n");
+  				//printf("Emegency vehicle detected\n");
   				etimer_stop(&secondPressTimer);
   				emergency = true;
 		  	}else if(etimer_expired(&secondPressTimer)){
-			  	printf("Normal vehicle detected\n");
+			  	//printf("Normal vehicle detected\n");
 		  	}
 		  	sendBroadcast();
 		}
@@ -128,12 +126,12 @@ PROCESS_THREAD(keyboard_process,ev,data){
 		printf("Please, type the password\n");
 		PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
 		if(strcmp((char *)data, psw) != 0){
-			printf("Incorrect password.\n");
+			printf("Incorrect password!!!\n");
 			continue;
 		}else{
 			printf("Type in the Emergency Warning\n");
 			PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
-			addMsg(data,(strlen(data)+1));
+			addMsg(data,(strlen(data)));
 			printf("you have inserted the following message: %s\n", emergencyMsg);
 		}
 	}

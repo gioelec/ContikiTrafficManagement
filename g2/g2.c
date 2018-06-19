@@ -13,6 +13,7 @@ AUTOSTART_PROCESSES(&g2);
 //------FUNCTIONS
 
 //------RUNICAST CALLBACK
+/*
 static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
 	void * dataReceived = packetbuf_dataptr();
 	printf("runicast message received from %d.%d, seqno %d\n", from->u8[0], from->u8[1], seqno);
@@ -22,11 +23,9 @@ static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8
 		return;
 	}
 }
-
+*/
 //------RUNICAST STRUCT
-static const struct runicast_callbacks runicast_calls = {recv_runicast};
-static struct runicast_conn runicast;
-
+static const struct runicast_callbacks runicast_calls = {};
 
 
 void closeAll(){
@@ -46,28 +45,28 @@ PROCESS_THREAD(g2, ev, data){
   	SENSORS_ACTIVATE(button_sensor);
   	etimer_set(&senseTimer,SENSE_PERIOD*CLOCK_SECOND); // every 5 seconds connected to the elecrticity supply
   	while(true){
-  		printf("waiting for an event-----G2\n");
+  		//printf("waiting for an event-----G2\n");
   		PROCESS_WAIT_EVENT();
-  		if (!stopped && ev == sensors_event && data == &button_sensor){
-  			stopped = true;
+  		//if (!stopped && ev == sensors_event && data == &button_sensor){
+  		if (ev == sensors_event && data == &button_sensor){
+  			//stopped = true;
   			etimer_set(&secondPressTimer,SECOND_PRESS*CLOCK_SECOND);
-  			printf("First time the button is pressed\n");
+  			//printf("First time the button is pressed\n");
 			PROCESS_WAIT_EVENT();
   			if (ev == sensors_event && data == &button_sensor){
-  				printf("Emegency vehicle detected\n");
+  				//printf("Emegency vehicle detected\n");
   				etimer_stop(&secondPressTimer);
   				emergency = true;
 		  	}else if(etimer_expired(&secondPressTimer)){
-			  	printf("Normal vehicle detected\n");
+			  	//printf("Normal vehicle detected\n");
 		  	}
 		  	sendBroadcast();
 		}
 		if (etimer_expired(&senseTimer)){
-			printf("G2 SENSED\n");
 	  		sample.temp = getTemperature();
 	  		sample.hum = getHumidity();
 	  		etimer_reset(&senseTimer);
-	  		printf("Sensed  temp: %d hum: %d \n",sample.temp,sample.hum);
+	  		//printf("Sensed  temp: %d hum: %d \n",sample.temp,sample.hum);
 	  		sendData(sample);
 	  	}
    	}

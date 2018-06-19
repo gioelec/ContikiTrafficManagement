@@ -111,7 +111,7 @@ void rechargeBattery(){
 		leds_off(LEDS_BLUE);
 	}
 }
-
+/*
 void sendNext(const linkaddr_t* recv){	 //tells to corresponding g sensor that another car can come
 	printf("SENDING NEXT\n");
 	gone = false;
@@ -123,7 +123,7 @@ void sendNext(const linkaddr_t* recv){	 //tells to corresponding g sensor that a
 	    runicast_send(&runicast, recv, MAX_RETRANSMISSIONS);
 	}
 
-}
+}*/
 void toggleLights(){
 	leds_toggle(LEDS_GREEN|LEDS_RED);
 	etimer_set(&toggleTimer,CLOCK_SECOND*SEMI_PERIOD);
@@ -132,7 +132,7 @@ void toggleLights(){
 void toggleBlue(){
 	leds_toggle(LEDS_BLUE);
 	etimer_set(&blueTimer,CLOCK_SECOND*BLUE_PERIOD);
-	printf("Toggled blue leds\n");
+	//printf("Toggled blue leds\n");
 }
 void closeAll(){	//closes all the opened connection
 	runicast_close(&runicast);
@@ -142,47 +142,47 @@ void turnGreen(){
 	leds_off(LEDS_RED);
 	leds_on(LEDS_GREEN);
 	gone = true;							//one vehicle has left the stop
-	printf("GREEN vehicle can proceed\n");
+	road=EMPTYROAD;
+	//printf("GREEN vehicle can proceed\n");
 }
 void turnRed(){
 	leds_off(LEDS_GREEN);
 	leds_on(LEDS_RED);
 	otherRoad = EMPTYROAD;
 	gone = false;
-	printf("RED vehicle cannot proceed\n");
+	//printf("RED vehicle cannot proceed\n");
 
 }
 void scheduleTraffic(){
-	printf("SCHEDULE TRAFFIC()\n");
+	//printf("SCHEDULE TRAFFIC()\n");
 	if(otherRoad == EMPTYROAD && road == EMPTYROAD){
-		printf("Both roads are empty\n");
-		printf("calling toggle toggleLights\n");
+		//printf("Both roads are empty\n");
+		//printf("calling toggle toggleLights\n");
 		leds_off(LEDS_RED|LEDS_GREEN);
 		toggleLights();
 		return;  	}
 	else if(otherRoad==EMPTYROAD && road != EMPTYROAD){
-		printf("other road empty\n");
+		//printf("other road empty\n");
 		turnGreen();
 	}
 	else if(otherRoad!=EMPTYROAD && road == EMPTYROAD){
-		printf("my road is empty\n");
+		//printf("my road is empty\n");
 		turnRed();
 	}
 	else if(otherRoad == road){					//both normal or both emergency
-		printf("roads in the same state\n");
+		//printf("roads in the same state\n");
 		if(mainRoad)
 			turnGreen();
 		else
 			turnRed();
 	}
 	else if(road == EMERGENCY && otherRoad != EMERGENCY){ //emergency has an higher priority
-		printf("my road has an emergency\n");
+		//printf("my road has an emergency\n");
 		turnGreen();
 	}
 	else if(road != EMERGENCY && otherRoad == EMERGENCY){ //emergency has an higher priority
-		printf("other road has an emergency\n");
+		//printf("other road has an emergency\n");
 		turnRed();
 	}
 	process_post(&traffic_light, PROCESS_EVENT_MSG, NULL);
-
 }
