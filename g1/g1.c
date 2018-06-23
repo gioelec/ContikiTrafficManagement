@@ -89,6 +89,7 @@ void closeAll(){
 //------PROCESS G1
 
 PROCESS_THREAD(g1, ev, data){
+	make clean && make burn-nodeid.upload nodeid=158 nodemac=158
   	PROCESS_EXITHANDLER(closeAll());
   	//have to be together
   	PROCESS_BEGIN();
@@ -132,7 +133,7 @@ PROCESS_THREAD(keyboard_process,ev,data){
 			printf("Type in the Emergency Warning\n");
 			PROCESS_WAIT_EVENT_UNTIL(ev==serial_line_event_message);
 			addMsg(data,(strlen(data)));
-			printf("you have inserted the following message: %s\n", emergencyMsg);
+			//printf("you have inserted the following message: %s\n", emergencyMsg);
 		}
 	}
   	PROCESS_END();

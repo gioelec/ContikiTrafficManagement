@@ -9,7 +9,7 @@
 #define MAX_RETRANSMISSIONS 5
 #define true 				1
 #define false 				0
-#define COOJA
+//#define COOJA
 
 typedef int bool;
 
@@ -28,8 +28,8 @@ const int g2Index  = 3;
 #ifndef COOJA
 	const linkaddr_t tl1Address = {{2,0}};
 	const linkaddr_t tl2Address = {{45,0}};
-	const linkaddr_t g1Address  = {{50,0}};
-	const linkaddr_t g2Address  = {{51,0}};
+	const linkaddr_t g1Address  = {{4,0}};
+	const linkaddr_t g2Address  = {{1,0}};
 #else
 	//COOJA ADDRESSES
 	const linkaddr_t tl1Address = {{1,0}};
