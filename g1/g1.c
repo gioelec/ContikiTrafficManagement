@@ -1,3 +1,4 @@
+
 #include "../g.h"
 #include "dev/serial-line.h"
 #include <stdlib.h>
@@ -89,7 +90,6 @@ void closeAll(){
 //------PROCESS G1
 
 PROCESS_THREAD(g1, ev, data){
-	make clean && make burn-nodeid.upload nodeid=158 nodemac=158
   	PROCESS_EXITHANDLER(closeAll());
   	//have to be together
   	PROCESS_BEGIN();
