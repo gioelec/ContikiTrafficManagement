@@ -127,7 +127,7 @@ void sendNext(const linkaddr_t* recv){	 //tells to corresponding g sensor that a
 void toggleLights(){
 	leds_toggle(LEDS_GREEN|LEDS_RED);
 	etimer_set(&toggleTimer,CLOCK_SECOND*SEMI_PERIOD);
-	consumeBattery(5);
+	consumeBattery(TOGGLE_COST);
 }
 void toggleBlue(){
 	leds_toggle(LEDS_BLUE);
