@@ -9,6 +9,8 @@
 #define MAX_RETRANSMISSIONS 5
 #define true 				1
 #define false 				0
+
+
 //#define COOJA
 
 typedef int bool;
@@ -30,8 +32,12 @@ const int g2Index  = 3;
 	const linkaddr_t tl2Address = {{45,0}};
 	const linkaddr_t g1Address  = {{4,0}};
 	const linkaddr_t g2Address  = {{1,0}};
+	#define TL1_ADDR			2
+	#define TL2_ADDR			45
 #else
 	//COOJA ADDRESSES
+	#define TL1_ADDR			1
+	#define TL2_ADDR			2
 	const linkaddr_t tl1Address = {{1,0}};
 	const linkaddr_t tl2Address = {{2,0}};
 	const linkaddr_t g1Address  = {{3,0}};
