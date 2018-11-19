@@ -54,14 +54,15 @@ PROCESS_THREAD(g2, ev, data){
   			//printf("First time the button is pressed\n");
 			PROCESS_WAIT_EVENT();
   			if (ev == sensors_event && data == &button_sensor){
-  				//printf("Emegency vehicle detected\n");
+  				printf("Emegency vehicle detected\n");
   				etimer_stop(&secondPressTimer);
   				emergency = true;
 		  	}else if(etimer_expired(&secondPressTimer)){
-			  	//printf("Normal vehicle detected\n");
+			  	printf("Normal vehicle detected\n");
 		  	}
 		  	sendBroadcast();
 		}
+		
 		if (etimer_expired(&senseTimer)){
 	  		sample.temp = getTemperature();
 	  		sample.hum = getHumidity();
