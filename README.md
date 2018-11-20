@@ -19,3 +19,5 @@ Install Contiki and eventually Cooja simulator if you do not have sky-mote senso
   <li>Choose which file you want to upload on the device(g1,g2,tl)</li>
   <li> <kbd>./run g1</kbd> </li>
 </ul>
+# Contributors
+[Gioele Carignani](https://github.com/gioelec/)<br>
