@@ -9,7 +9,9 @@
 #define MAX_RETRANSMISSIONS 5
 #define true 				1
 #define false 				0
-//#define COOJA
+
+
+#define COOJA
 
 typedef int bool;
 
@@ -30,8 +32,12 @@ const int g2Index  = 3;
 	const linkaddr_t tl2Address = {{45,0}};
 	const linkaddr_t g1Address  = {{4,0}};
 	const linkaddr_t g2Address  = {{1,0}};
+	#define TL1_ADDR			2
+	#define TL2_ADDR			45
 #else
 	//COOJA ADDRESSES
+	#define TL1_ADDR			1
+	#define TL2_ADDR			2
 	const linkaddr_t tl1Address = {{1,0}};
 	const linkaddr_t tl2Address = {{2,0}};
 	const linkaddr_t g1Address  = {{3,0}};
@@ -61,4 +67,9 @@ void sendData(){ //Sends the sensed data in runicast to the sink
 	    //printf("%u.%u: sending runicast to address %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1], g1Address.u8[0], g1Address.u8[1]);
 	    runicast_send(&runicast, &g1Address, MAX_RETRANSMISSIONS);
 	}
+}
+int get_index(const linkaddr_t* link) {
+	if(linkaddr_cmp(link,&tl1Address)) return TL1_ADDR;
+	if(linkaddr_cmp(link,&tl2Address)) return TL2_ADDR;
+	return -1;
 }

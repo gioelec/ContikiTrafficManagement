@@ -45,7 +45,7 @@ void addToBuffer(struct sampleData * data, int sender){
 	if(!received[sender]){
 		received[sender] = true;
 		remaining--;
-		//printf("REMAINING SAMPLES: %d\n",remaining );
+		printf("REMAINING SAMPLES: %d\n",remaining );
 		if(remaining<=0){
 			tempStore[myAddr] = getTemperature();
 			humStore[myAddr] = getHumidity();
@@ -107,11 +107,11 @@ PROCESS_THREAD(g1, ev, data){
   			//printf("First time the button is pressed\n");
 			PROCESS_WAIT_EVENT();
   			if (ev == sensors_event && data == &button_sensor){
-  				//printf("Emegency vehicle detected\n");
+  				printf("Emegency vehicle detected\n");
   				etimer_stop(&secondPressTimer);
   				emergency = true;
 		  	}else if(etimer_expired(&secondPressTimer)){
-			  	//printf("Normal vehicle detected\n");
+			  	printf("Normal vehicle detected\n");
 		  	}
 		  	sendBroadcast();
 		}

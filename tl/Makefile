@@ -1,9 +1,10 @@
-CONTIKI_PROJECT = tl2
+CONTIKI_PROJECT = tl
 
 all: $(CONTIKI_PROJECT)
 
 CONTIKI = ../../../
 
 CONTIKI_WITH_RIME = 1
+
 
 include $(CONTIKI)/Makefile.include

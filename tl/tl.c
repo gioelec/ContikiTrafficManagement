@@ -1,55 +1,6 @@
-#include "header.h"
-#include "dev/leds.h"
+#include "tl.h"
 
-//toggling semiperiod
-#define SEMI_PERIOD 	1
-//battery costants
-#define FULL_TH    		100
-#define HALF_TH    		50
-#define LOW_TH			20
-#define TOGGLE_COST		5
-#define SENSE_COST 		10
-//blue leds toggling period
-#define BLUE_PERIOD		2
-//sensing costants
-#define HALF_SENSE		10 
-#define FULL_SENSE		5
-#define LOW_SENSE 		20
-#define EMPTY_SENSE     60
-//scheduling traffic period
-#define SCHEDULE_PERIOD 5
-
-
-//------PROCESS STRUCTURE
-
-
-PROCESS(traffic_light, "Traffic Light");
-
-AUTOSTART_PROCESSES(&traffic_light);
-
-
-
-enum batteryState{
-	FULL,HALF,LOW,EMPTY
-};
-enum roadState{
-	EMPTYROAD,NORMAL,EMERGENCY
-};
-//------VARIABLES
-struct etimer blueTimer;
-struct etimer toggleTimer;
-struct etimer scheduleTimer;
-
-
-enum batteryState battery = FULL;
-int batteryLevel          = 100;
-enum roadState road       = EMPTYROAD;
-enum roadState otherRoad  = EMPTYROAD;
-int sensingPeriod		  = FULL_SENSE; //variable modified when battery is decremented
-bool blueStarted 		  =	false;
-bool mainRoad 			  = false;		//states wether the road is the main one or not
-bool gone				  = false;
-bool scheduleTimerRunning = false;
+//------FUNCTIONS
 //---RUNICAST CALLBACK
 static void recv_runicast(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
 }
@@ -68,6 +19,14 @@ static struct broadcast_conn broadcast;
 
 
 //------FUNCTIONS
+bool isMainRoad(){
+	bool mainRoad = get_index(&linkaddr_node_addr)==TL1_ADDR;
+	if(mainRoad)
+		printf("I am the main road\n");
+	else
+		printf("I am not the main road\n");
+	return mainRoad;
+}
 void initialize(){
 	etimer_set(&toggleTimer,SEMI_PERIOD*CLOCK_SECOND);
 	batteryLevel=100;
@@ -185,4 +144,103 @@ void scheduleTraffic(){
 		turnRed();
 	}
 	process_post(&traffic_light, PROCESS_EVENT_MSG, NULL);
+}
+
+
+//------BROADCAST CALLBACK 
+static void broadcast_recv(struct broadcast_conn *c, const linkaddr_t *from){
+	linkaddr_t gAddress= mainRoad?g1Address:g2Address;
+	linkaddr_t otherAddress = mainRoad?g2Address:g1Address;
+	bool isNormal = (((char *)packetbuf_dataptr())[0]=='n');
+	//printf("TL1 RECEIVE:broadcast message received from %d.%d: '%s'\n", from->u8[0], from->u8[1], (char *)packetbuf_dataptr());
+	if(linkaddr_cmp(from,&gAddress)){
+		if(road!=EMPTYROAD){
+	//		printf("Road already occupied, ignoring\n");
+			return;
+		}
+		if(isNormal){
+	//		printf("My road ordinary vehicle\n");
+			road = NORMAL;
+		}else{
+	//		printf("My road emergency vehicle\n");
+			road = EMERGENCY;
+		}
+	}else if(linkaddr_cmp(from,&otherAddress)){
+		if(otherRoad!=EMPTYROAD){
+	//		printf("Road already occupied, ignoring\n");
+			return;
+		}
+		if(isNormal){
+	//		printf("Other road ordinary vehicle\n");
+			otherRoad = NORMAL;
+		}else{
+	//		printf("Other road emergency vehicle\n");
+			otherRoad = EMERGENCY;
+		}
+	}
+	if(!scheduleTimerRunning){  //we have to check that we are not already in a scheduled situation otherwise wait the scheduling timer to expire
+		scheduleTraffic();
+	}else{
+	//	printf("SCHEDULING already ongoing\n");
+	}	
+
+}
+
+//------BROADCAST STRUCT
+static const struct broadcast_callbacks broadcast_call = {broadcast_recv}; //Be careful to the order
+
+
+
+
+//------PROCESS
+PROCESS_THREAD(traffic_light, ev, data){
+	PROCESS_EXITHANDLER(closeAll());
+	PROCESS_BEGIN();
+	broadcast_open(&broadcast, 129, &broadcast_call);
+	runicast_open(&runicast, 144, &runicast_calls);
+	mainRoad = isMainRoad();
+	printf("The Rime address of TL1 mote is: %u.%u\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1]);
+	initialize();
+	SENSORS_ACTIVATE(button_sensor);
+	while(true){
+		PROCESS_WAIT_EVENT();
+		if (etimer_expired(&blueTimer)){    
+			if(battery==LOW){
+				toggleBlue();
+			}else if(battery==EMPTY)
+				leds_on(LEDS_BLUE);
+	  	}
+	  	if (etimer_expired(&senseTimer)){
+	  		sample.temp = getTemperature();
+	  		sample.hum = getHumidity();
+	  		consumeBattery(SENSE_COST);
+	  		//printf("New battery level %d\n", batteryLevel );
+	  		etimer_set(&senseTimer,sensingPeriod*CLOCK_SECOND);
+	  		//printf("Sensed  temp: %d hum: %d \n",sample.temp,sample.hum);
+	  		if(battery == LOW && !blueStarted){
+	  			etimer_set(&blueTimer,CLOCK_SECOND*BLUE_PERIOD);
+	  			blueStarted = true;
+	  		}
+	  		printf("sendData\n");
+	  		sendData(sample);
+	  	}
+
+	  	if (ev == sensors_event && data == &button_sensor){
+	  		rechargeBattery();
+	  	}
+	  	if(ev==PROCESS_EVENT_MSG && !scheduleTimerRunning){
+	  		scheduleTimerRunning = true;
+			etimer_set(&scheduleTimer,SCHEDULE_PERIOD*CLOCK_SECOND);
+			//if(gone)
+			//	sendNext(&g1Address);
+	  	}	  	
+	  	if(!scheduleTimerRunning && etimer_expired(&toggleTimer)&& otherRoad==EMPTYROAD && road == EMPTYROAD )
+	  		toggleLights();
+	  	if(ev!=PROCESS_EVENT_MSG && etimer_expired(&scheduleTimer)&&scheduleTimerRunning){
+		  	scheduleTimerRunning=false;
+		  	scheduleTraffic();
+	  	}
+	}
+	SENSORS_DEACTIVATE(button_sensor);
+	PROCESS_END();
 }
