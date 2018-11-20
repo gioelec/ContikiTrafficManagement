@@ -12,6 +12,7 @@ Install Contiki and eventually Cooja simulator if you do not have sky-mote senso
   <li> <kbd>ant run</kbd> </li>
   <li>load the simulation <kbd>cd contiki/tools/cooja</kbd></li>
 </ul>
+<h3> MOTES </h3>
 <ul>
   <li> comment <kbd>#define COOJA</kbd> in <kbd>header.h/kbd> file</li>
   <li> put your motes address in <kbd>header.h/kbd> file</li>
