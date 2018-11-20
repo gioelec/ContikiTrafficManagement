@@ -15,7 +15,7 @@ Install Contiki and eventually Cooja simulator if you do not have sky-mote senso
 <h3> MOTES </h3>
 <ul>
   <li> comment <kbd>#define COOJA</kbd> in <kbd>header.h</kbd> file</li>
-  <li> put your motes address in <kbd>header.h</kbd> file</li>
+  <li> put your motes addresses in <kbd>header.h</kbd> file</li>
   <li>Choose which file you want to upload on the device(g1,g2,tl)</li>
   <li> <kbd>./run g1</kbd> </li>
 </ul>
