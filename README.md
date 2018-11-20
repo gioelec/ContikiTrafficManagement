@@ -20,4 +20,4 @@ Install Contiki and eventually Cooja simulator if you do not have sky-mote senso
   <li> <kbd>./run g1</kbd> </li>
 </ul>
 # Contributors
-[Gioele Carignani](https://github.com/gioelec/)<br>
+[Gioele Carignani](https://github.com/gioelec/)
